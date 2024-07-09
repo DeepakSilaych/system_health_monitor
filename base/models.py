@@ -3,7 +3,7 @@ from django.db import models
 
 class Log(models.Model):
     log_text = models.CharField(max_length=200)
-    timestamp = models.DateTimeField('timestamp', auto_now_add=True)
+    timestamp = models.DateTimeField(auto_now_add=True)
     priority = models.IntegerField(default=0)
 
     def __str__(self):
