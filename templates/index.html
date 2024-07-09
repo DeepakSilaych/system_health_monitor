@@ -32,8 +32,19 @@
             text-align: center;
         }
 
-        .backend {
-            margin-bottom: 24px;
+        .system {
+            padding: .5rem 0 .5rem 1.2rem;
+            line-height: 1.2;
+        }
+
+        .system h2 {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 8px;
+        }
+
+        .system p{
+            margin: 0;
         }
 
         footer {
@@ -60,23 +71,19 @@
     <div class="container">
         <h1>System Monitor</h1>
 
-        <div class="backend">
-            <h2>Backend Status</h2>
-            <p>Status: {{ backend_status }}</p>
-            <p>Last Checked: {{ backend_last_checked }}</p>
-            {% if backend_last_status_change_to_up %}
-            <p>Last Status Change to Up: {{ backend_last_status_change_to_up }}</p>
-            {% endif %}
+        {% for System in systems %}
+        <div class="system" style="background-color: {% if System.status == 'up' %} #d1fae5; {% else %} #fed7d7; {% endif %}" >
+            <h2>{{ System.name }}</h2>
+            <p> 
+                {{ System.description }}  <br>
+                Status: {{ System.status }} <br>
+                Last Checked: {{ System.last_check }}
+            </p>
         </div>
+        {% endfor %}
 
-        <div class="automations">
-            <h2>Automations</h2>
-            <ul>
-                {% for automation in automations %}
-                <li>{{ automation.automation_name }} - {{ automation.automation_status }} - Last Run: {{ automation.automation_last_run }} - Next Run: {{ automation.automation_next_run }}</li>
-                {% endfor %}
-            </ul>
-        </div>
+
+
 
         <div class="logs">
             <h2>Logs</h2>

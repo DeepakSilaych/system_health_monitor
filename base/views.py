@@ -1,53 +1,54 @@
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
-from .models import Log, Backend, Automation
-from .serializers import LogSerializer, BackendSerializer, AutomationSerializer
+from .models import Log, System
+from .serializers import LogSerializer
 from django.utils import timezone
-import requests
 from django.shortcuts import render
+
+from django.utils import timezone
+from datetime import timedelta
 
 class LogViewSet(APIView):
     def post(self, request):
-        serializer = LogSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        data = {
+            'log_text': request.data.get('log_text'),
+            'priority': request.data.get('priority'),
+        }
+        Log.create(log_text=data['log_text'], priority=data['priority'])
+        return Response({'status': 'Log created'}, status=status.HTTP_201_CREATED)
     
     def get(self, request):
-        logs = Log.objects.all().order_by('-log_date')
+        logs = Log.objects.all().order_by('-timestamp')
         serializer = LogSerializer(logs, many=True)
         return Response(serializer.data)
 
-class BackendViewSet(APIView):
-    def get(self, request):
-        backends = Backend.objects.all()
-        serializer = BackendSerializer(backends, many=True)
-        return Response(serializer.data)
+class Systemlog(APIView):
+    def post(self, request):
+        data = {
+            'code': request.data.get('code'),
+        }
+        system = System.objects.get(name=data['code'])
+        system.status = 'up'
 
-    def check_backend_health(self):
-        backends = Backend.objects.all()
-        for backend in backends:
-            try:
-                response = requests.get(f'http://{backend.url}/health/')
-                if response.status_code == 200 and response.json().get('status') == 'up':
-                    backend.status = 'up'   
-                else:
-                    backend.status = 'down'
-            except requests.RequestException:
-                backend.status = 'down'
-            finally:
-                backend.last_check = timezone.now()
-                if backend.status == 'up':
-                    backend.last_status_change_to_up = timezone.now()
-                backend.save()
+        system.last_check = timezone.now()     
+        system.save()
 
-class AutomationViewSet(APIView):
-    def get(self, request):
-        automations = Automation.objects.all()
-        serializer = AutomationSerializer(automations, many=True)
-        return Response(serializer.data)
+        return Response({'status': system.status})
+
 
 def index(request):
-    return render(request, 'index.html')
+    logs = Log.objects.all().order_by('-timestamp')
+    systems = System.objects.all()
+
+    for system in systems:
+        if system.last_check == None or system.last_check < timezone.now() - timedelta(minutes=5):
+            system.status = 'down'
+        system.save()
+
+    context = {
+        'logs': logs,
+        'systems': systems,
+    }
+
+    return render(request, 'index.html', context)
