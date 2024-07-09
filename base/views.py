@@ -39,7 +39,7 @@ class Systemlog(APIView):
 
 
 def index(request):
-    logs = Log.objects.all().order_by('-timestamp')
+    logs = Log.objects.all().order_by('-timestamp')[:10000]
     systems = System.objects.all()
 
     for system in systems:
