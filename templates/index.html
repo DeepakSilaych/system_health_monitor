@@ -35,6 +35,7 @@
         .system {
             padding: .5rem 0 .5rem 1.2rem;
             line-height: 1.2;
+            margin-bottom: 3px;
         }
 
         .system h2 {
@@ -89,7 +90,7 @@
             <h2>Logs</h2>
             <ul>
                 {% for log in logs %}
-                <li>{{ log.log_text }} - {{ log.timestamp }}</li>
+                    <li class='log'  >{{ log.log_text }} - {{ log.timestamp }}</li>
                 {% endfor %}
             </ul>
         </div>
