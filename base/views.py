@@ -13,7 +13,7 @@ class LogViewSet(APIView):
     def post(self, request):
         data = {
             'log_text': request.data.get('log_text'),
-            'priority': request.data.get('priority'),
+            'priority': request.data.get('priority') if request.data.get('priority') else 0
         }
         Log.create(log_text=data['log_text'], priority=data['priority'])
         return Response({'status': 'Log created'}, status=status.HTTP_201_CREATED)
