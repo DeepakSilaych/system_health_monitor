@@ -18,7 +18,7 @@ class LogViewSet(APIView):
             'priority': request.data.get('priority') if request.data.get('priority') else 0
         }
 
-        if data['priority'] > 0:
+        if int(data['priority']) > 0:
             try :
                 sendtelegrammsg(data['log_text'])
             except:
