@@ -9,12 +9,20 @@ from django.shortcuts import render
 from django.utils import timezone
 from datetime import timedelta
 
+from .utils import sendtelegrammsg
+
 class LogViewSet(APIView):
     def post(self, request):
         data = {
             'log_text': request.data.get('log_text'),
             'priority': request.data.get('priority') if request.data.get('priority') else 0
         }
+
+        if data['priority'] > 0:
+            try :
+                sendtelegrammsg(data['log_text'])
+            except:
+                pass
 
         Log.objects.create(log_text=data['log_text'], priority=data['priority'])
         return Response({'status': 'Log created'}, status=status.HTTP_201_CREATED)
