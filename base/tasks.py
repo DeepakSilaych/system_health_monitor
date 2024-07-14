@@ -1,7 +1,7 @@
 from celery import shared_task
 from django.conf import settings
 from .utils import sendtelegrammsg
-from models import System
+from .models import System
 from datetime import timedelta
 from django.utils import timezone
 
