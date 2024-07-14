@@ -38,7 +38,11 @@ class Systemlog(APIView):
             'code': request.data.get('code'),
         }
         system = System.objects.get(name=data['code'])
-        system.status = 'up'
+
+        if system.status == 'down':
+            sendtelegrammsg(f'{system.name} is up')
+            system.status = 'up'
+            system.last_status_change = timezone.now()
 
         system.last_check = timezone.now()     
         system.save()
@@ -49,11 +53,6 @@ class Systemlog(APIView):
 def index(request):
     logs = Log.objects.all().order_by('-timestamp')[:10000]
     systems = System.objects.all()
-
-    for system in systems:
-        if system.last_check == None or system.last_check < timezone.now() - timedelta(minutes=5):
-            system.status = 'down'
-        system.save()
 
     context = {
         'logs': logs,
