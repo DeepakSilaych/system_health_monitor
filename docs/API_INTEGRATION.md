@@ -79,112 +79,139 @@ POST /alerts/
 }
 ```
 
-## Python Integration Example
+## Python Client Library
+
+We now provide an official Python client library for easier integration:
+
+```bash
+pip install climate-monitor-client
+```
+
+### Quick Start
 
 ```python
-import requests
-import psutil
-import time
+from climate_monitor import SystemMonitorClient
 
-class SystemMonitorClient:
-    def __init__(self, base_url, service_name, api_key=None):
-        self.base_url = base_url.rstrip('/')
-        self.service_name = service_name
-        self.headers = {
-            'Content-Type': 'application/json'
-        }
-        if api_key:
-            self.headers['Authorization'] = f'Bearer {api_key}'
+# Initialize the client
+monitor = SystemMonitorClient(
+    base_url='http://your-monitor-host:8000',
+    service_name='your-service-name',
+    api_key='your-api-key'  # Optional
+)
 
-    def update_status(self, status='up', endpoint=None):
-        """Update service status"""
-        data = {
-            'name': self.service_name,
-            'status': status
-        }
-        if endpoint:
-            data['endpoint'] = endpoint
-        
-        response = requests.post(
-            f'{self.base_url}/services/',
-            json=data,
-            headers=self.headers
-        )
-        return response.json()
+# Update service status
+monitor.update_status('up', 'http://your-service:port')
 
-    def send_metrics(self):
-        """Send system metrics"""
-        metrics = {
-            'cpu': psutil.cpu_percent(),
-            'memory': psutil.virtual_memory().percent,
-            'disk': psutil.disk_usage('/').percent
-        }
-        
-        for metric_type, value in metrics.items():
-            data = {
-                'service': self.service_name,
-                'metric_type': metric_type,
-                'value': value
-            }
-            requests.post(
-                f'{self.base_url}/metrics/',
-                json=data,
-                headers=self.headers
-            )
+# Send system metrics
+monitor.send_metrics()
 
-    def update_pipeline(self, pipeline_type, status, metadata=None):
-        """Update pipeline status"""
-        data = {
-            'pipeline_type': pipeline_type,
-            'status': status
-        }
-        if metadata:
-            data['metadata'] = metadata
-            
-        response = requests.post(
-            f'{self.base_url}/pipelines/',
-            json=data,
-            headers=self.headers
-        )
-        return response.json()
+# Update pipeline status
+monitor.update_pipeline(
+    pipeline_type='data_ingestion',
+    status='running',
+    metadata={'step': 'download', 'progress': 45}
+)
 
-    def send_alert(self, title, message, severity=1):
-        """Send an alert"""
-        data = {
-            'title': title,
-            'message': message,
-            'severity': severity,
-            'service': self.service_name
-        }
-        response = requests.post(
-            f'{self.base_url}/alerts/',
-            json=data,
-            headers=self.headers
-        )
-        return response.json()
+# Send an alert
+monitor.send_alert(
+    title='High CPU Usage',
+    message='CPU usage above 90%',
+    severity=2  # 1: Info, 2: Warning, 3: Critical
+)
 
-# Usage Example
-if __name__ == '__main__':
-    monitor = SystemMonitorClient(
-        base_url='http://localhost:8000',
-        service_name='example-service'
-    )
-
-    # Update service status
-    monitor.update_status('up', 'http://example-service:8000')
-
-    # Send metrics every minute
-    while True:
-        try:
-            monitor.send_metrics()
-            time.sleep(60)
-        except Exception as e:
-            monitor.send_alert(
-                'Metrics Collection Failed',
-                str(e),
-                severity=2
-            )
+# Start automatic metric collection
+monitor.start_metric_collection(interval=60)  # Every minute
 ```
+
+### Features
+
+The client library provides:
+- Automatic retry with exponential backoff
+- Built-in error handling and logging
+- System metrics collection using `psutil`
+- Configurable request timeouts
+- Automatic alert generation on errors
+
+### Advanced Usage
+
+1. **Custom Metrics**
+```python
+# Send custom metrics along with system metrics
+monitor.send_metrics({
+    'requests_per_second': 156.7,
+    'response_time_ms': 245.3
+})
+```
+
+2. **Pipeline Monitoring**
+```python
+# Track ML pipeline progress
+monitor.update_pipeline(
+    pipeline_type='training',
+    status='running',
+    metadata={
+        'epoch': 5,
+        'loss': 0.234,
+        'accuracy': 0.945
+    }
+)
+```
+
+3. **Continuous Monitoring**
+```python
+# Start collecting metrics with custom metrics
+monitor.start_metric_collection(
+    interval=30,  # Every 30 seconds
+    additional_metrics={
+        'queue_size': lambda: get_queue_size(),
+        'active_users': lambda: count_active_users()
+    }
+)
+```
+
+## Error Handling
+
+The client library automatically handles common errors:
+
+1. **Network Issues**
+- Automatic retry with exponential backoff
+- Configurable max retries and timeout
+- Automatic error logging
+
+2. **Server Errors**
+- Retry on 5xx errors
+- Automatic alert generation
+- Detailed error logging
+
+3. **Authentication**
+- Proper API key handling
+- Clear error messages on auth failures
+
+## Best Practices
+
+1. **Service Status**
+- Update status on service startup
+- Set status to 'down' on graceful shutdown
+- Use health check endpoints
+
+2. **Metrics Collection**
+- Use reasonable collection intervals (30-60s)
+- Include relevant custom metrics
+- Monitor resource usage trends
+
+3. **Pipeline Monitoring**
+- Track all important pipeline stages
+- Include relevant metadata
+- Set appropriate error messages
+
+4. **Alerts**
+- Use appropriate severity levels
+- Include actionable information
+- Avoid alert fatigue
+
+## Support
+
+For issues and feature requests, please visit our [GitHub repository](https://github.com/your-org/climate-system-monitor).
 
 ## Node.js Integration Example
 
