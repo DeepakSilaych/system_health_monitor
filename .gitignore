@@ -1,25 +1,106 @@
 # gitignore for django project
 
-/.vscode
-/collectstatic
-/static
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
-/celeryschedule
-/env
-/celerybeat-schedule
-
-*.sqlite3
-*/db.sqlite3
-*/__pycache__
-
-*/__pycache__/
-*/migrations/
-*/__pycache__/*
-*/migrations/*
+# Django
+*.log
+*.pot
 *.pyc
-*.pyo
-*.pyd
-*.pyz
-*.pyw
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+static/
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Monitoring System Specific
+*.pid
+celerybeat-schedule
+celerybeat.pid
+*.rdb
+monitoring_data/
+metrics/
+logs/
+
+# System Files
+.DS_Store
+Thumbs.db
+
+# Temp Files
+*.bak
+*.tmp
+*.temp
+
+# Test Coverage
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+cover/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Distribution / packaging
+.Python
+env/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
 
 server.sock

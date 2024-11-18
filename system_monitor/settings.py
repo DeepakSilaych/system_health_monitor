@@ -1,4 +1,3 @@
-
 from pathlib import Path
 import os
 
@@ -30,10 +29,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
-    'base',
     'rest_framework',
-    'django_celery_beat',
+    'base',
 ]
 
 MIDDLEWARE = [
@@ -51,7 +48,9 @@ ROOT_URLCONF = 'system_monitor.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],
+        'DIRS': [
+            os.path.join(BASE_DIR, 'base/templates'),
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

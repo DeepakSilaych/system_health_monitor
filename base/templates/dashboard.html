@@ -1,0 +1,124 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row">
+    <!-- Services Status -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Services Status</h5>
+                <i class="fas fa-sync refresh-btn" data-target="services"></i>
+            </div>
+            <div class="card-body" id="services-container">
+                {% for service in services %}
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span>{{ service.name }}</span>
+                    <span class="status-{{ service.status }}">
+                        <i class="fas fa-{% if service.status == 'up' %}check-circle{% elif service.status == 'down' %}times-circle{% else %}question-circle{% endif %}"></i>
+                        {{ service.status|title }}
+                    </span>
+                </div>
+                {% empty %}
+                <p class="text-muted">No services registered</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Active Alerts -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Active Alerts</h5>
+                <i class="fas fa-sync refresh-btn" data-target="alerts"></i>
+            </div>
+            <div class="card-body" id="alerts-container">
+                {% for alert in recent_alerts %}
+                <div class="card severity-{{ alert.severity }} mb-2">
+                    <div class="card-body">
+                        <h6 class="card-title">{{ alert.title }}</h6>
+                        <p class="card-text">{{ alert.message }}</p>
+                        <small class="text-muted">{{ alert.timestamp|timesince }} ago</small>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted">No active alerts</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <!-- Active Pipelines -->
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">Active Pipelines</h5>
+                <i class="fas fa-sync refresh-btn" data-target="pipelines"></i>
+            </div>
+            <div class="card-body" id="pipelines-container">
+                <div class="table-responsive">
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Status</th>
+                                <th>Start Time</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for pipeline in active_pipelines %}
+                            <tr>
+                                <td>{{ pipeline.get_pipeline_type_display }}</td>
+                                <td>{{ pipeline.get_status_display }}</td>
+                                <td>{{ pipeline.start_time }}</td>
+                                <td>{{ pipeline.start_time|timesince }}</td>
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="4" class="text-center text-muted">No active pipelines</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(document).ready(function() {
+    // Refresh button click handler
+    $('.refresh-btn').click(function() {
+        const target = $(this).data('target');
+        const btn = $(this);
+        btn.addClass('fa-spin');
+        
+        // Fetch updated data
+        $.get(`/${target}/`, function(data) {
+            let container = $(`#${target}-container`);
+            
+            // Update the container with new data
+            // You'll need to implement the HTML generation based on the data
+            // This is just a placeholder
+            console.log(`Refreshed ${target} data:`, data);
+            
+            btn.removeClass('fa-spin');
+        }).fail(function() {
+            alert(`Failed to refresh ${target}`);
+            btn.removeClass('fa-spin');
+        });
+    });
+
+    // Auto-refresh every 30 seconds
+    setInterval(function() {
+        $('.refresh-btn').click();
+    }, 30000);
+});
+</script>
+{% endblock %}
